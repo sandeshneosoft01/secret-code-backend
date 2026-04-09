@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import MessageModel from '@models/message-model';
+import { encrypt, decrypt } from '@utils/encryption-util';
 
 export default {
   async createMessage(req: Request, res: Response, next: NextFunction) {
@@ -40,9 +41,9 @@ export default {
 
       const message = await MessageModel.create({
         sender: senderId,
-        content,
+        content: encrypt(content),
         emailLists,
-        code,
+        code: encrypt(code),
         expiresAt,
         status: 'new',
       });
@@ -63,9 +64,16 @@ export default {
 
       const messages = await MessageModel.find({ sender: senderId }).sort({ createdAt: -1 });
 
+      const decryptedMessages = messages.map((msg) => {
+        const msgObj = msg.toObject();
+        msgObj.content = decrypt(msgObj.content);
+        msgObj.code = decrypt(msgObj.code);
+        return msgObj;
+      });
+
       res.status(200).json({
         success: true,
-        data: messages,
+        data: decryptedMessages,
       });
     } catch (error) {
       next(error);

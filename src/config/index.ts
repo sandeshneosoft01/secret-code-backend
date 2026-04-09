@@ -33,3 +33,7 @@ export const redis = {
 export const caching = {
   contentCacheDuration: parseInt(process.env.CONTENT_CACHE_DURATION_MILLIS || '600000'),
 };
+
+export const encryption = {
+  secretKey: process.env.ENCRYPTION_SECRET || 'd0a5f8e9c0b1a2d3e4f5a6b7c8d9e0f1', // 32-byte default for development
+};
