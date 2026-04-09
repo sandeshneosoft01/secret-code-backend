@@ -6,6 +6,8 @@ import { createMessageSchema } from '@validations/message-validator';
 
 const router = Router();
 
+router.get('/by-code/:code', messageController.getMessageByCode);
+
 router.use(authMiddleware);
 
 router.post(

@@ -47,3 +47,13 @@ export const decrypt = (text: string): string => {
     return text;
   }
 };
+
+/**
+ * Generates a SHA-256 hash of the input text.
+ * Used for creating searchable blind indexes of encrypted data.
+ * @param text The text to hash
+ * @returns The hex encoded hash
+ */
+export const generateHash = (text: string): string => {
+  return crypto.createHash('sha256').update(text).digest('hex');
+};

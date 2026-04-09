@@ -5,6 +5,7 @@ export interface IMessage extends Document {
   content: string;
   emailLists: string[];
   code: string;
+  codeHash: string;
   status: 'new' | 'expiry' | 'delete';
   expiresAt?: Date;
   createdAt: Date;
@@ -29,6 +30,11 @@ const MessageSchema = new Schema<IMessage>(
     code: {
       type: String,
       required: true,
+    },
+    codeHash: {
+      type: String,
+      required: true,
+      index: true,
     },
     status: {
       type: String,

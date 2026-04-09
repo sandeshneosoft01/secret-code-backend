@@ -10,4 +10,6 @@ export default {
   EMAIL_LIST_REQUIRED: 'Email list is required',
   CODE_MUST_BE_6_DIGITS: 'Code must be 6 characters long',
   CODE_REQUIRED: 'Secret code is required',
+  MESSAGE_NOT_FOUND: 'Secret message not found. Please check your code.',
+  MESSAGE_EXPIRED: 'This secret message has expired and is no longer available.',
 };
