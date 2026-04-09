@@ -1,0 +1,27 @@
+# Dependencies
+/node_modules
+
+# All package json
+package-lock.json
+
+# Environment varibales
+.env
+
+# yarn error logs
+yarn-error.log
+yarn.lock
+
+# VS code setting
+.vscode
+
+# logs
+/src/logs/*.log
+/src/logs
+
+/public/uploads
+/build
+/logs
+
+/src/firebase-service-account.json
+.vercel
+.env*.local
