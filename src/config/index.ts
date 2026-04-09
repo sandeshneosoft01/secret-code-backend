@@ -30,8 +30,6 @@ export const redis = {
   port: parseInt(process.env.REDIS_PORT || '0'),
 };
 
-export const superAdminApiKey = process.env.SUPER_ADMIN_API_KEY;
-
 export const caching = {
   contentCacheDuration: parseInt(process.env.CONTENT_CACHE_DURATION_MILLIS || '600000'),
 };

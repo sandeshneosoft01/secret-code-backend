@@ -8,22 +8,48 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "ignoreDeprecations": "6.0",
     "baseUrl": "src",
     "paths": {
-      "@config/*": ["config/*"],
-      "@/constants/*": ["constants/*"],
-      "@controllers/*": ["controllers/*"],
-      "@language/*": ["language/*"],
-      "@middleware/*": ["middleware/*"],
-      "@models/*": ["models/*"],
-      "@routes/*": ["routes/*"],
-      "@services/*": ["services/*"],
-      "@types/*": ["types/*"],
-      "@utils/*": ["utils/*"],
-      "@validations/*": ["validations/*"]
+      "@config/*": [
+        "config/*"
+      ],
+      "@/constants/*": [
+        "constants/*"
+      ],
+      "@controllers/*": [
+        "controllers/*"
+      ],
+      "@language/*": [
+        "language/*"
+      ],
+      "@middleware/*": [
+        "middleware/*"
+      ],
+      "@models/*": [
+        "models/*"
+      ],
+      "@routes/*": [
+        "routes/*"
+      ],
+      "@services/*": [
+        "services/*"
+      ],
+      "@types/*": [
+        "types/*"
+      ],
+      "@utils/*": [
+        "utils/*"
+      ],
+      "@validations/*": [
+        "validations/*"
+      ]
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ]
 }

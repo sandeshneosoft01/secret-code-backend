@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 import UserSchema from '@models/user-model';
-import AdminUserModel from '@models/admin-user-model';
 
 import { tokenInfo } from '@config/index';
 import admin from '@utils/firebase';
@@ -17,17 +16,6 @@ export default {
       const existingUser = await UserSchema.findOne({ email });
       if (existingUser) {
         return res.status(400).json({ message: 'Email already registered' });
-      }
-
-      const isUser = role === 'user';
-
-      if (isUser) {
-        const isAdminUser = await AdminUserModel.findOne({ 'users.email': email });
-        if (isAdminUser) {
-          return res
-            .status(400)
-            .json({ success: false, message: 'Email already registered, Please contact admin' });
-        }
       }
 
       // ✅ Hash password
@@ -83,18 +71,6 @@ export default {
       const userAlreadyExists = await UserSchema.findOne({ email });
       if (userAlreadyExists) return res.status(400).json({ error: 'User already exists' });
 
-      const isUser = role === 'user';
-
-      if (isUser) {
-        const isAdminUser = await AdminUserModel.findOne({ 'users.email': email });
-        if (isAdminUser) {
-          return res.status(400).json({
-            success: false,
-            message: 'Email already registered, Please contact the admin',
-          });
-        }
-      }
-
       const newUser = await UserSchema.create({
         firebaseUID: uid,
         fullName: name,
@@ -139,26 +115,18 @@ export default {
       // ✅ Check if user exists
       const user = await UserSchema.findOne({ email });
 
-      const admin = await AdminUserModel.findOne(
-        { 'users.email': email },
-        { users: { $elemMatch: { email } }, _id: 0 },
-      ).lean();
-
-      const adminWithUsers = admin as { users?: any[] } | null;
-      const userObject = adminWithUsers?.users?.[0];
-
-      if ((!user || !user.password) && (!userObject || !userObject?.password)) {
+      if ((!user || !user.password)) {
         return res.status(400).json({ message: 'Invalid credentials' });
       }
 
-      if (userObject?.status === 'suspended') {
+      if (user.status === 'suspended') {
         return res.status(400).json({
           success: false,
           message: 'Your account is suspended. Please contact the administrator for assistance.',
         });
       }
 
-      const currentUser = user || userObject;
+      const currentUser = user;
 
       // ✅ Compare password
       const isMatch = await bcrypt.compare(password, currentUser.password);
@@ -227,39 +195,6 @@ export default {
     } catch (error) {
       console.error('Signin error:', error);
       res.status(401).json({ error: 'Invalid token' });
-    }
-  },
-
-  async getUserDetail(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id, email } = req.user as { id: string; email: string };
-
-      const admin = await AdminUserModel.findOne(
-        { 'users.email': email },
-        { users: { $elemMatch: { email } }, _id: 0 },
-      )
-        .select(['-password'])
-        .lean();
-
-      const adminWithUsers = admin as { users?: any[] } | null;
-      const userObject = adminWithUsers?.users?.[0];
-
-      if (userObject?.status === 'suspended') {
-        return res.status(401).json({
-          success: false,
-          data: { status: 'suspended' },
-          message: 'Your account is suspended. Please contact the administrator for assistance.',
-        });
-      }
-      const userInfo = await UserSchema.findById(id).select(['-password']);
-
-      return res.status(200).json({
-        success: true,
-        data: userInfo ?? userObject,
-        message: 'User details fetched successfully',
-      });
-    } catch (error) {
-      next(error);
     }
   },
 };

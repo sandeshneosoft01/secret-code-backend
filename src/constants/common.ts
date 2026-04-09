@@ -2,11 +2,6 @@ const TIMEZONE = {
   INDIA: 'Asia/Calcutta'
 }
 
-const ROLE = {
-  ADMIN: 'admin',
-  USER: 'user'
-}
-
 const STATUS = {
   ACTIVE: 'active',
   INACTIVE: 'inactive',
@@ -17,4 +12,4 @@ const STATUS = {
   REPLIED: 'replied'
 }
 
-export default { TIMEZONE, ROLE, STATUS }
+export default { TIMEZONE, STATUS }

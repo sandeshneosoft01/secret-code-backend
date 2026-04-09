@@ -3,22 +3,24 @@ import HttpStatus from 'http-status';
 
 // Routes
 import account from './account-route';
-import adminUser from './admin-user-route';
-import notification from './notification-route';
-import tasks from './tasks-route';
-import bugRoute from './bug-route';
+import messageRoute from './message-route';
 
 import { errorHandler } from '@middleware/errorHandler-middleware';
 
 const router = Router();
 
-const apiRoutes = [account, adminUser, notification, tasks, bugRoute];
+const apiRoutes = [
+  { path: '/account', route: account },
+  { path: '/messages', route: messageRoute },
+];
 
 const register = (app: Express): void => {
   app.use(router);
 
   // Register API routes
-  router.use('/api/v1/', apiRoutes);
+  apiRoutes.forEach((route) => {
+    router.use(`/api/v1${route.path}`, route.route);
+  });
 
   router.get('/health', (_: Request, res: Response) => {
     res.status(200).json({
