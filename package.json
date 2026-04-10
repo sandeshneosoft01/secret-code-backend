@@ -48,7 +48,7 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "engines": {
-    "node": "22.0.0"
+    "node": "20.19.0"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",
