@@ -10,7 +10,7 @@ import { errorHandler } from '@middleware/errorHandler-middleware';
 const router = Router();
 
 const apiRoutes = [
-  { path: '/account', route: account },
+  { path: '/', route: account },
   { path: '/messages', route: messageRoute },
 ];
 

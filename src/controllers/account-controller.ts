@@ -9,13 +9,16 @@ import admin from '@utils/firebase';
 
 export default {
   async userSignup(req: Request, res: Response, next: NextFunction) {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     try {
       // ✅ Check if user already exists
       const existingUser = await UserSchema.findOne({ email });
       if (existingUser) {
-        return res.status(400).json({ message: 'Email already registered' });
+        return res.status(400).json({ 
+          message: 'EMAIL_ALREADY_REGISTERED',
+          code: 'EMAIL_ALREADY_REGISTERED' 
+        });
       }
 
       // ✅ Hash password
@@ -26,7 +29,6 @@ export default {
         fullName: name,
         email,
         password: hashedPassword,
-        role: role || 'user',
       });
 
       // ✅ Generate token (JWT)
@@ -35,48 +37,45 @@ export default {
           id: user._id,
           fullName: user.fullName,
           email: user.email,
-          firebaseUID: user.firebaseUID ?? null, // null for simple signup
-          role: user.role,
+          firebaseUID: user.firebaseUID ?? null,
         },
         tokenInfo.jwtSecret,
         { expiresIn: '7d' },
       );
 
       res.status(201).json({
-        message: 'Signup successful',
+        message: 'SIGNUP_SUCCESSFUL',
+        code: 'SIGNUP_SUCCESSFUL',
         token,
         user: {
           id: user._id,
           fullName: user.fullName,
           email: user.email,
-          role: user.role,
-          status: user.status,
           createdAt: user.createdAt,
         },
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Server error' });
+      res.status(500).json({ error: 'INTERNAL_ERROR' });
       next(error);
     }
   },
   async userSignupWithGoogle(req: Request, res: Response, next: NextFunction) {
     try {
-      const { idToken, role } = req.body;
+      const { idToken } = req.body;
       if (!idToken) return res.status(400).json({ error: 'Token missing' });
 
       const decodedToken = await admin.auth().verifyIdToken(idToken);
       const { uid, email, name, picture } = decodedToken;
 
       const userAlreadyExists = await UserSchema.findOne({ email });
-      if (userAlreadyExists) return res.status(400).json({ error: 'User already exists' });
+      if (userAlreadyExists) return res.status(400).json({ error: 'USER_ALREADY_EXISTS' });
 
       const newUser = await UserSchema.create({
         firebaseUID: uid,
         fullName: name,
         email,
         photoURL: picture,
-        role: role || 'user',
       });
 
       const token = jwt.sign(
@@ -84,22 +83,19 @@ export default {
           id: newUser._id,
           fullName: newUser.fullName,
           email: email,
-          role: newUser.role,
         },
         tokenInfo.jwtSecret,
         { expiresIn: '7d' },
       );
 
       res.status(201).json({
-        message: 'Signup success',
+        message: 'SIGNUP_SUCCESSFUL',
         token,
         user: {
           id: newUser._id,
           firebaseUID: uid,
           fullName: newUser.fullName,
           email: newUser.email,
-          role: newUser.role,
-          status: newUser.status,
           createdAt: newUser.createdAt,
         },
       });
@@ -116,13 +112,17 @@ export default {
       const user = await UserSchema.findOne({ email });
 
       if ((!user || !user.password)) {
-        return res.status(400).json({ message: 'Invalid credentials' });
+        return res.status(400).json({ 
+          message: 'INVALID_CREDENTIALS',
+          code: 'INVALID_CREDENTIALS' 
+        });
       }
 
       if (user.status === 'suspended') {
         return res.status(400).json({
           success: false,
-          message: 'Your account is suspended. Please contact the administrator for assistance.',
+          message: 'ACCOUNT_SUSPENDED',
+          code: 'ACCOUNT_SUSPENDED',
         });
       }
 
@@ -130,7 +130,7 @@ export default {
 
       // ✅ Compare password
       const isMatch = await bcrypt.compare(password, currentUser.password);
-      if (!isMatch) return res.status(400).json({ message: 'Incorrect password' });
+      if (!isMatch) return res.status(400).json({ message: 'INVALID_CREDENTIALS' });
 
       // ✅ Generate Token
       const token = jwt.sign(
@@ -138,26 +138,24 @@ export default {
           id: currentUser._id,
           fullName: currentUser.fullName,
           email: currentUser.email,
-          role: currentUser.role,
         },
         tokenInfo.jwtSecret,
         { expiresIn: '7d' },
       );
 
       res.status(200).json({
-        message: 'Signin successful',
+        message: 'SIGNIN_SUCCESSFUL',
+        code: 'SIGNIN_SUCCESSFUL',
         token,
         user: {
           id: currentUser._id,
           fullName: currentUser.fullName,
           email: currentUser.email,
-          role: currentUser.role,
-          status: currentUser.status,
         },
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Server error' });
+      res.status(500).json({ error: 'INTERNAL_ERROR' });
     }
   },
 
@@ -173,7 +171,7 @@ export default {
 
       // If not in DB, create new user record
       if (!user) {
-        res.status(401).json({ error: 'User not found' });
+        return res.status(401).json({ error: 'USER_NOT_FOUND' });
       }
 
       const token = jwt.sign(
@@ -181,20 +179,19 @@ export default {
           id: user._id,
           fullName: user.fullName,
           email: user.email,
-          role: user.role,
         },
         tokenInfo.jwtSecret,
         { expiresIn: '7d' },
       );
 
       res.status(200).json({
-        message: 'Signin success',
+        message: 'SIGNIN_SUCCESSFUL',
         token,
         user,
       });
     } catch (error) {
       console.error('Signin error:', error);
-      res.status(401).json({ error: 'Invalid token' });
+      res.status(401).json({ error: 'INVALID_TOKEN' });
     }
   },
 };

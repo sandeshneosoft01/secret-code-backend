@@ -13,7 +13,10 @@ export const database = {
   },
 };
 
-export const corsUrl = process.env.CORS_URL;
+export const corsConfig = {
+  allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+  corsUrl: process.env.CORS_URL,
+};
 
 export const tokenInfo = {
   jwtSecret: process.env.JWT_SECRET || '',

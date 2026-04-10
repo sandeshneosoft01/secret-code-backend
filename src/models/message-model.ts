@@ -3,11 +3,13 @@ import { Schema, model, Document, models, Types } from 'mongoose';
 export interface IMessage extends Document {
   sender: Types.ObjectId;
   content: string;
-  emailLists: string[];
+  emailLists?: string[];
   code: string;
   codeHash: string;
   status: 'new' | 'expiry' | 'delete';
   expiresAt?: Date;
+  viewCount: number;
+  viewedBy: { email: string; viewedAt: Date }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,7 +27,7 @@ const MessageSchema = new Schema<IMessage>(
     },
     emailLists: {
       type: [String],
-      required: true,
+      default: [],
     },
     code: {
       type: String,
@@ -44,6 +46,16 @@ const MessageSchema = new Schema<IMessage>(
     expiresAt: {
       type: Date,
     },
+    viewCount: {
+      type: Number,
+      default: 0,
+    },
+    viewedBy: [
+      {
+        email: { type: String, required: true },
+        viewedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true },
 );

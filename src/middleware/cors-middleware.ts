@@ -1,7 +1,5 @@
-// src/middleware/cors.ts
 import cors, { CorsOptions } from 'cors';
-
-const allowedOrigins: string[] = process.env.ALLOWED_ORIGINS?.split(',') || [];
+import { corsConfig } from '../config';
 
 export const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
@@ -10,12 +8,13 @@ export const corsOptions: CorsOptions = {
       return callback(null, true);
     }
 
-    if (allowedOrigins.includes(origin)) {
+    if (corsConfig.allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
     return callback(new Error('Not allowed by CORS'));
   },
-
   credentials: true, // Enable cookies/auth headers
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language'],
 };

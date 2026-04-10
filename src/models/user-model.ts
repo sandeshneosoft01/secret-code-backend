@@ -6,8 +6,6 @@ export interface IUser extends Document {
   email: string;
   password?: string | null;
   photoURL?: string;
-  role: 'admin' | 'user';
-  status: 'active' | 'suspended';
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -36,16 +34,6 @@ const UserSchema = new Schema<IUser>(
     photoURL: {
       type: String,
       required: false,
-    },
-    role: {
-      type: String,
-      enum: ['admin', 'user'],
-      default: 'user',
-    },
-    status: {
-      type: String,
-      enum: ['active', 'suspended'],
-      default: 'active',
     },
   },
   { timestamps: true },

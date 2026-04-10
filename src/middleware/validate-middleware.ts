@@ -4,25 +4,32 @@ import HttpStatus from 'http-status';
 import Joi from 'joi';
 
 interface ValidateRequestOptions {
-  schema: Joi.ObjectSchema;
-  validateBody?: boolean;
-  validateQuery?: boolean;
-  validateParams?: boolean;
+  schema?: Joi.ObjectSchema;
+  validateBody?: boolean | Joi.ObjectSchema;
+  validateQuery?: boolean | Joi.ObjectSchema;
+  validateParams?: boolean | Joi.ObjectSchema;
 }
 
 const validateRequest = (options: ValidateRequestOptions): RequestHandler => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { schema, validateBody = true, validateQuery = true, validateParams = true } = options;
-    console.log({ options });
+    let { schema = Joi.object(), validateBody = true, validateQuery = true, validateParams = true } = options;
     let dataToValidate: any = {};
 
-    if (validateBody) dataToValidate = { ...dataToValidate, ...req.body };
-    if (validateQuery) dataToValidate = { ...dataToValidate, ...req.query };
-    if (validateParams) dataToValidate = { ...dataToValidate, ...req.params };
-    try {
-      console.log({ dataToValidate });
-      await schema.validateAsync(dataToValidate, { abortEarly: false });
+    if (validateBody) {
+      if (typeof validateBody !== 'boolean') schema = schema.concat(validateBody);
+      dataToValidate = { ...dataToValidate, ...req.body };
+    }
+    if (validateQuery) {
+      if (typeof validateQuery !== 'boolean') schema = schema.concat(validateQuery);
+      dataToValidate = { ...dataToValidate, ...req.query };
+    }
+    if (validateParams) {
+      if (typeof validateParams !== 'boolean') schema = schema.concat(validateParams);
+      dataToValidate = { ...dataToValidate, ...req.params };
+    }
 
+    try {
+      await schema.validateAsync(dataToValidate, { abortEarly: false });
       next();
     } catch (err: unknown) {
       if (err && (err as Joi.ValidationError).isJoi) {

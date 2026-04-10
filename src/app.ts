@@ -11,12 +11,15 @@ import routes from './routes';
 import { port, database } from './config';
 import logger from '@utils/logger';
 import { corsOptions } from '@middleware/cors-middleware';
+import i18next from './config/i18n';
+import i18nextMiddleware from 'i18next-http-middleware';
 
 function initializeApp(app: Express) {
   /**
    * Load all middleware
    */
   function middleware() {
+    app.use(i18nextMiddleware.handle(i18next));
     app.use(cors(corsOptions));
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json({ limit: '2000mb' }));

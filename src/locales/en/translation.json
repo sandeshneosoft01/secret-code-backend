@@ -1,0 +1,13 @@
+{
+  "SIGNUP_SUCCESSFUL": "Account created successfully!",
+  "SIGNIN_SUCCESSFUL": "Signed in successfully!",
+  "EMAIL_ALREADY_REGISTERED": "This email is already registered.",
+  "INVALID_CREDENTIALS": "Invalid email or password.",
+  "ACCOUNT_SUSPENDED": "Your account is suspended. Please contact support.",
+  "INCORRECT_PASSWORD": "Correct password is required.",
+  "USER_NOT_FOUND": "User not found.",
+  "INVALID_TOKEN": "Your session has expired. Please sign in again.",
+  "MESSAGE_CREATED": "Secret message created successfully!",
+  "INTERNAL_ERROR": "An unexpected error occurred. Please try again later.",
+  "TOKEN_MISSING": "Authentication token is missing."
+}
