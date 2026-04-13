@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import HttpStatus from 'http-status';
 
 import UserSchema from '@models/user-model';
 
@@ -15,7 +16,7 @@ export default {
       // ✅ Check if user already exists
       const existingUser = await UserSchema.findOne({ email });
       if (existingUser) {
-        return res.status(400).json({ 
+        return res.status(HttpStatus.BAD_REQUEST).json({ 
           message: 'EMAIL_ALREADY_REGISTERED',
           code: 'EMAIL_ALREADY_REGISTERED' 
         });
@@ -43,7 +44,7 @@ export default {
         { expiresIn: '7d' },
       );
 
-      res.status(201).json({
+      res.status(HttpStatus.CREATED).json({
         message: 'SIGNUP_SUCCESSFUL',
         code: 'SIGNUP_SUCCESSFUL',
         token,
@@ -56,20 +57,20 @@ export default {
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'INTERNAL_ERROR' });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: 'INTERNAL_ERROR' });
       next(error);
     }
   },
   async userSignupWithGoogle(req: Request, res: Response, next: NextFunction) {
     try {
       const { idToken } = req.body;
-      if (!idToken) return res.status(400).json({ error: 'Token missing' });
+      if (!idToken) return res.status(HttpStatus.BAD_REQUEST).json({ error: 'Token missing' });
 
       const decodedToken = await admin.auth().verifyIdToken(idToken);
       const { uid, email, name, picture } = decodedToken;
 
       const userAlreadyExists = await UserSchema.findOne({ email });
-      if (userAlreadyExists) return res.status(400).json({ error: 'USER_ALREADY_EXISTS' });
+      if (userAlreadyExists) return res.status(HttpStatus.BAD_REQUEST).json({ error: 'USER_ALREADY_EXISTS' });
 
       const newUser = await UserSchema.create({
         firebaseUID: uid,
@@ -88,7 +89,7 @@ export default {
         { expiresIn: '7d' },
       );
 
-      res.status(201).json({
+      res.status(HttpStatus.CREATED).json({
         message: 'SIGNUP_SUCCESSFUL',
         token,
         user: {
@@ -101,7 +102,7 @@ export default {
       });
     } catch (error: any) {
       console.error('Error creating user:', error);
-      res.status(400).json({ error: error.message });
+      res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
     }
   },
   async userSignin(req: Request, res: Response) {
@@ -112,14 +113,14 @@ export default {
       const user = await UserSchema.findOne({ email });
 
       if ((!user || !user.password)) {
-        return res.status(400).json({ 
+        return res.status(HttpStatus.BAD_REQUEST).json({ 
           message: 'INVALID_CREDENTIALS',
           code: 'INVALID_CREDENTIALS' 
         });
       }
 
       if (user.status === 'suspended') {
-        return res.status(400).json({
+        return res.status(HttpStatus.BAD_REQUEST).json({
           success: false,
           message: 'ACCOUNT_SUSPENDED',
           code: 'ACCOUNT_SUSPENDED',
@@ -130,7 +131,7 @@ export default {
 
       // ✅ Compare password
       const isMatch = await bcrypt.compare(password, currentUser.password);
-      if (!isMatch) return res.status(400).json({ message: 'INVALID_CREDENTIALS' });
+      if (!isMatch) return res.status(HttpStatus.BAD_REQUEST).json({ message: 'INVALID_CREDENTIALS' });
 
       // ✅ Generate Token
       const token = jwt.sign(
@@ -143,7 +144,7 @@ export default {
         { expiresIn: '7d' },
       );
 
-      res.status(200).json({
+      res.status(HttpStatus.OK).json({
         message: 'SIGNIN_SUCCESSFUL',
         code: 'SIGNIN_SUCCESSFUL',
         token,
@@ -155,14 +156,14 @@ export default {
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'INTERNAL_ERROR' });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: 'INTERNAL_ERROR' });
     }
   },
 
   async userSigninWithGoogle(req: Request, res: Response, next: NextFunction) {
     try {
       const { idToken } = req.body;
-      if (!idToken) return res.status(400).json({ error: 'Token missing' });
+      if (!idToken) return res.status(HttpStatus.BAD_REQUEST).json({ error: 'Token missing' });
 
       const decodedToken = await admin.auth().verifyIdToken(idToken);
 
@@ -171,7 +172,7 @@ export default {
 
       // If not in DB, create new user record
       if (!user) {
-        return res.status(401).json({ error: 'USER_NOT_FOUND' });
+        return res.status(HttpStatus.UNAUTHORIZED).json({ error: 'USER_NOT_FOUND' });
       }
 
       const token = jwt.sign(
@@ -184,14 +185,14 @@ export default {
         { expiresIn: '7d' },
       );
 
-      res.status(200).json({
+      res.status(HttpStatus.OK).json({
         message: 'SIGNIN_SUCCESSFUL',
         token,
         user,
       });
     } catch (error) {
       console.error('Signin error:', error);
-      res.status(401).json({ error: 'INVALID_TOKEN' });
+      res.status(HttpStatus.UNAUTHORIZED).json({ error: 'INVALID_TOKEN' });
     }
   },
 };

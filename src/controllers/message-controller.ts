@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
+import HttpStatus from 'http-status';
+
 import MessageModel from '@models/message-model';
+
 import { encrypt, decrypt, generateHash } from '@utils/encryption-util';
 import { verifyToken } from '@utils/auth';
 
@@ -50,7 +53,7 @@ export default {
         status: 'new',
       });
 
-      res.status(201).json({
+      res.status(HttpStatus.CREATED).json({
         success: true,
         message: 'MESSAGE_CREATED',
         data: message,
@@ -73,7 +76,7 @@ export default {
         return msgObj;
       });
 
-      res.status(200).json({
+      res.status(HttpStatus.OK).json({
         success: true,
         data: decryptedMessages,
       });
@@ -87,7 +90,7 @@ export default {
       const { code } = req.params as { code: string };
 
       if (!code) {
-        return res.status(400).json({
+        return res.status(HttpStatus.BAD_REQUEST).json({
           success: false,
           message: 'CODE_REQUIRED',
         });
@@ -97,7 +100,7 @@ export default {
       const message = await MessageModel.findOne({ codeHash });
 
       if (!message) {
-        return res.status(404).json({
+        return res.status(HttpStatus.NOT_FOUND).json({
           success: false,
           message: 'MESSAGE_NOT_FOUND',
         });
@@ -128,7 +131,7 @@ export default {
         
         // If not sender, deny access
         if (!isSender) {
-          return res.status(410).json({
+          return res.status(HttpStatus.GONE).json({
             success: false,
             message: 'MESSAGE_EXPIRED',
           });
@@ -137,7 +140,7 @@ export default {
 
       // If already marked as expiry/destroyed and not sender, deny access
       if (message.status === 'expiry' && !isSender) {
-        return res.status(410).json({
+        return res.status(HttpStatus.GONE).json({
           success: false,
           message: 'MESSAGE_EXPIRED',
         });
@@ -146,7 +149,7 @@ export default {
       // Access control for recipients
       if (message.emailLists && message.emailLists.length > 0 && !isSender) {
         if (!viewerEmail || !message.emailLists.includes(viewerEmail)) {
-          return res.status(403).json({
+          return res.status(HttpStatus.FORBIDDEN).json({
             success: false,
             message: 'ACCESS_DENIED',
           });
@@ -173,7 +176,7 @@ export default {
       decryptedMessage.content = decrypt(decryptedMessage.content);
       decryptedMessage.code = decrypt(decryptedMessage.code);
 
-      res.status(200).json({
+      res.status(HttpStatus.OK).json({
         success: true,
         data: decryptedMessage,
       });
@@ -190,7 +193,7 @@ export default {
       const message = await MessageModel.findOne({ _id: id, sender: senderId });
 
       if (!message) {
-        return res.status(404).json({
+        return res.status(HttpStatus.NOT_FOUND).json({
           success: false,
           message: 'MESSAGE_NOT_FOUND_OR_UNAUTHORIZED',
         });
@@ -250,7 +253,7 @@ export default {
       decryptedMessage.content = decrypt(decryptedMessage.content);
       decryptedMessage.code = decrypt(decryptedMessage.code);
 
-      res.status(200).json({
+      res.status(HttpStatus.OK).json({
         success: true,
         message: 'MESSAGE_UPDATED',
         data: decryptedMessage,
@@ -268,7 +271,7 @@ export default {
       const message = await MessageModel.findOne({ _id: id, sender: senderId });
 
       if (!message) {
-        return res.status(404).json({
+        return res.status(HttpStatus.NOT_FOUND).json({
           success: false,
           message: 'MESSAGE_NOT_FOUND_OR_UNAUTHORIZED',
         });
@@ -276,7 +279,7 @@ export default {
 
       if (message.status === 'delete') {
         await MessageModel.deleteOne({ _id: id });
-        return res.status(200).json({
+        return res.status(HttpStatus.OK).json({
           success: true,
           message: 'MESSAGE_PERMANENTLY_DELETED',
         });
@@ -285,7 +288,7 @@ export default {
       message.status = 'delete';
       await message.save();
 
-      res.status(200).json({
+      res.status(HttpStatus.OK).json({
         success: true,
         message: 'MESSAGE_DELETED',
       });
@@ -303,7 +306,7 @@ export default {
       const messages = await MessageModel.find({ _id: { $in: ids }, sender: senderId });
 
       if (messages.length === 0) {
-        return res.status(404).json({
+        return res.status(HttpStatus.NOT_FOUND).json({
           success: false,
           message: 'MESSAGES_NOT_FOUND_OR_UNAUTHORIZED',
         });
@@ -325,7 +328,7 @@ export default {
         await MessageModel.updateMany({ _id: { $in: idsToMarkAsDeleted } }, { $set: { status: 'delete' } });
       }
 
-      res.status(200).json({
+      res.status(HttpStatus.OK).json({
         success: true,
         message: 'MESSAGES_PROCESSED',
         deletedCount: idsToPermanentlyDelete.length,
@@ -344,7 +347,7 @@ export default {
       const message = await MessageModel.findOne({ _id: id, sender: senderId });
 
       if (!message) {
-        return res.status(404).json({
+        return res.status(HttpStatus.NOT_FOUND).json({
           success: false,
           message: 'MESSAGE_NOT_FOUND_OR_UNAUTHORIZED',
         });
@@ -353,7 +356,7 @@ export default {
       message.status = 'new';
       await message.save();
 
-      res.status(200).json({
+      res.status(HttpStatus.OK).json({
         success: true,
         message: 'MESSAGE_RESTORED',
       });
@@ -372,7 +375,7 @@ export default {
         { $set: { status: 'new' } }
       );
 
-      res.status(200).json({
+      res.status(HttpStatus.OK).json({
         success: true,
         message: 'MESSAGES_RESTORED',
         count: result.modifiedCount,

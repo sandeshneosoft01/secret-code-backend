@@ -23,7 +23,7 @@ const register = (app: Express): void => {
   });
 
   router.get('/health', (_: Request, res: Response) => {
-    res.status(200).json({
+    res.status(HttpStatus.OK).json({
       status: 'ok',
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
