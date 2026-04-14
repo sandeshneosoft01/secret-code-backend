@@ -1,42 +1,56 @@
 export const environment = process.env.NODE_ENV;
-export const port = process.env.PORT;
 export const timezone = process.env.TZ;
 
+function getEnvOrDefault(key: string, defaultValue: string): string {
+  return process.env[key] || defaultValue;
+}
+
+function getRequiredEnv(key: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Environment variable ${key} is missing. Please set it in your .env file.`);
+  }
+  return value;
+}
+
+export const port = getEnvOrDefault('PORT', '8000');
+
 export const database = {
-  name: process.env.MONGO_DB_NAME || '',
-  uri:
-    process.env.MONGO_URI ||
-    `mongodb://${process.env.MONGO_HOST || 'localhost'}:${process.env.MONGO_PORT || '27017'}`,
+  name: getRequiredEnv('MONGO_DB_NAME'),
+  uri: getEnvOrDefault(
+    'MONGO_URI',
+    `mongodb://${getEnvOrDefault('MONGO_HOST', 'localhost')}:${getEnvOrDefault('MONGO_PORT', '27017')}`,
+  ),
   options: {
-    minPoolSize: parseInt(process.env.MONGO_MIN_POOL_SIZE || '5', 10),
-    maxPoolSize: parseInt(process.env.MONGO_MAX_POOL_SIZE || '10', 10),
+    minPoolSize: parseInt(getEnvOrDefault('MONGO_MIN_POOL_SIZE', '5'), 10),
+    maxPoolSize: parseInt(getEnvOrDefault('MONGO_MAX_POOL_SIZE', '10'), 10),
   },
 };
 
 export const corsConfig = {
-  allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+  allowedOrigins: getEnvOrDefault('ALLOWED_ORIGINS', 'http://localhost:3000').split(','),
   corsUrl: process.env.CORS_URL,
 };
 
 export const tokenInfo = {
-  jwtSecret: process.env.JWT_SECRET || '',
-  accessTokenValidity: parseInt(process.env.ACCESS_TOKEN_VALIDITY_SEC || '0'),
-  refreshTokenValidity: parseInt(process.env.REFRESH_TOKEN_VALIDITY_SEC || '0'),
-  issuer: process.env.TOKEN_ISSUER || '',
-  audience: process.env.TOKEN_AUDIENCE || '',
+  jwtSecret: getRequiredEnv('JWT_SECRET'),
+  accessTokenValidity: parseInt(getEnvOrDefault('ACCESS_TOKEN_VALIDITY_SEC', '86400')),
+  refreshTokenValidity: parseInt(getEnvOrDefault('REFRESH_TOKEN_VALIDITY_SEC', '604800')),
+  issuer: getRequiredEnv('TOKEN_ISSUER'),
+  audience: getRequiredEnv('TOKEN_AUDIENCE'),
 };
 
-export const logDirectory = process.env.LOG_DIR;
+export const logDirectory = getEnvOrDefault('LOG_DIR', 'logs');
 
 export const redis = {
-  host: process.env.REDIS_HOST || '',
-  port: parseInt(process.env.REDIS_PORT || '0'),
+  host: getEnvOrDefault('REDIS_HOST', 'localhost'),
+  port: parseInt(getEnvOrDefault('REDIS_PORT', '6379')),
 };
 
 export const caching = {
-  contentCacheDuration: parseInt(process.env.CONTENT_CACHE_DURATION_MILLIS || '600000'),
+  contentCacheDuration: parseInt(getEnvOrDefault('CONTENT_CACHE_DURATION_MILLIS', '600000')),
 };
 
 export const encryption = {
-  secretKey: process.env.ENCRYPTION_SECRET || 'd0a5f8e9c0b1a2d3e4f5a6b7c8d9e0f1', // 32-byte default for development
+  secretKey: getRequiredEnv('ENCRYPTION_SECRET'),
 };

@@ -22,7 +22,6 @@ function initializeApp(app: Express) {
     app.use(i18nextMiddleware.handle(i18next));
     app.use(cors(corsOptions));
     app.use(bodyParser.urlencoded({ extended: false }));
-    app.use(bodyParser.json({ limit: '2000mb' }));
     app.use(compression());
     app.use(methodOverride());
     app.use(
