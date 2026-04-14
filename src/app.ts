@@ -21,6 +21,7 @@ function initializeApp(app: Express) {
   function middleware() {
     app.use(i18nextMiddleware.handle(i18next));
     app.use(cors(corsOptions));
+    app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(compression());
     app.use(methodOverride());
