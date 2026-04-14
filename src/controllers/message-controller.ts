@@ -6,6 +6,7 @@ import MessageModel from '@models/message-model';
 
 import { encrypt, decrypt, generateHash } from '@utils/encryption-util';
 import { verifyToken } from '@utils/auth';
+import { calculateExpiryDate } from '@utils/date-util';
 
 export default {
   async createMessage(req: Request, res: Response, next: NextFunction) {
@@ -13,36 +14,7 @@ export default {
       const { content, emailLists = [], code, expiryTime, customExpiryValue, customExpiryUnit } = req.body;
       const { id: senderId } = req.user as { id: string };
 
-      let expiresAt: Date | undefined;
-
-      if (expiryTime && expiryTime !== 'never') {
-        expiresAt = new Date();
-        let value: number;
-        let unit: string;
-
-        if (expiryTime === 'custom') {
-          value = parseInt(customExpiryValue);
-          unit = customExpiryUnit;
-        } else {
-          // Parse something like "10m", "1h", "1d"
-          value = parseInt(expiryTime.slice(0, -1));
-          unit = expiryTime.slice(-1);
-        }
-
-        switch (unit) {
-          case 'm':
-            expiresAt.setMinutes(expiresAt.getMinutes() + value);
-            break;
-          case 'h':
-            expiresAt.setHours(expiresAt.getHours() + value);
-            break;
-          case 'd':
-            expiresAt.setDate(expiresAt.getDate() + value);
-            break;
-          default:
-            expiresAt.setMinutes(expiresAt.getMinutes() + 10); // Default 10m
-        }
-      }
+      const expiresAt = calculateExpiryDate(expiryTime, customExpiryValue, customExpiryUnit);
 
       const message = await MessageModel.create({
         sender: senderId,
@@ -214,38 +186,7 @@ export default {
       }
 
       if (expiryTime !== undefined) {
-        let expiresAt: Date | undefined;
-
-        if (expiryTime === 'never') {
-          expiresAt = undefined;
-        } else {
-          expiresAt = new Date();
-          let value: number;
-          let unit: string;
-
-          if (expiryTime === 'custom') {
-            value = parseInt(customExpiryValue);
-            unit = customExpiryUnit;
-          } else {
-            value = parseInt(expiryTime.slice(0, -1));
-            unit = expiryTime.slice(-1);
-          }
-
-          switch (unit) {
-            case 'm':
-              expiresAt.setMinutes(expiresAt.getMinutes() + value);
-              break;
-            case 'h':
-              expiresAt.setHours(expiresAt.getHours() + value);
-              break;
-            case 'd':
-              expiresAt.setDate(expiresAt.getDate() + value);
-              break;
-            default:
-              expiresAt.setMinutes(expiresAt.getMinutes() + 10);
-          }
-        }
-        message.expiresAt = expiresAt;
+        message.expiresAt = calculateExpiryDate(expiryTime, customExpiryValue, customExpiryUnit);
       }
 
       await message.save();

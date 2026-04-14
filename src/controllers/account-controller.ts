@@ -58,7 +58,6 @@ export default {
     } catch (error) {
       console.error(error);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: 'INTERNAL_ERROR' });
-      next(error);
     }
   },
   async userSignupWithGoogle(req: Request, res: Response, next: NextFunction) {
@@ -119,14 +118,6 @@ export default {
         });
       }
 
-      if (user.status === 'suspended') {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          success: false,
-          message: 'ACCOUNT_SUSPENDED',
-          code: 'ACCOUNT_SUSPENDED',
-        });
-      }
-
       const currentUser = user;
 
       // ✅ Compare password
@@ -149,9 +140,11 @@ export default {
         code: 'SIGNIN_SUCCESSFUL',
         token,
         user: {
-          id: currentUser._id,
-          fullName: currentUser.fullName,
-          email: currentUser.email,
+          id: user._id,
+          fullName: user?.fullName || '',
+          email: user?.email || '',
+          photoURL: user?.photoURL || '',
+          createdAt: user?.createdAt || '',
         },
       });
     } catch (error) {

@@ -9,5 +9,6 @@
   "INVALID_TOKEN": "Your session has expired. Please sign in again.",
   "MESSAGE_CREATED": "Secret message created successfully!",
   "INTERNAL_ERROR": "An unexpected error occurred. Please try again later.",
-  "TOKEN_MISSING": "Authentication token is missing."
+  "TOKEN_MISSING": "Authentication token is missing.",
+  "TOO_MANY_REQUESTS": "Too many requests, please try again later."
 }

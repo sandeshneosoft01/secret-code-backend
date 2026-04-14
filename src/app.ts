@@ -13,6 +13,7 @@ import logger from '@utils/logger';
 import { corsOptions } from '@middleware/cors-middleware';
 import i18next from './config/i18n';
 import i18nextMiddleware from 'i18next-http-middleware';
+import { rateLimiter } from '@middleware/rate-limiter';
 
 function initializeApp(app: Express) {
   /**
@@ -21,7 +22,7 @@ function initializeApp(app: Express) {
   function middleware() {
     app.use(i18nextMiddleware.handle(i18next));
     app.use(cors(corsOptions));
-    app.use(bodyParser.json());
+    app.use(bodyParser.json({ limit: '1mb' }));
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(compression());
     app.use(methodOverride());
@@ -30,6 +31,7 @@ function initializeApp(app: Express) {
         frameguard: { action: 'deny' },
       }),
     );
+    app.use(rateLimiter);
 
     app.use(
       '/bug-attachments',
@@ -50,6 +52,7 @@ function initializeApp(app: Express) {
     try {
       await mongoose.connect(database.uri, {
         dbName: database.name,
+        ...database.options,
       });
       logger.info('MongoDB connected successfully');
     } catch (error) {
