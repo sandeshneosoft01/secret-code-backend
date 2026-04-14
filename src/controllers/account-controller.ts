@@ -16,9 +16,9 @@ export default {
       // ✅ Check if user already exists
       const existingUser = await UserSchema.findOne({ email });
       if (existingUser) {
-        return res.status(HttpStatus.BAD_REQUEST).json({ 
+        return res.status(HttpStatus.BAD_REQUEST).json({
           message: 'EMAIL_ALREADY_REGISTERED',
-          code: 'EMAIL_ALREADY_REGISTERED' 
+          code: 'EMAIL_ALREADY_REGISTERED'
         });
       }
 
@@ -113,9 +113,9 @@ export default {
       const user = await UserSchema.findOne({ email });
 
       if ((!user || !user.password)) {
-        return res.status(HttpStatus.BAD_REQUEST).json({ 
+        return res.status(HttpStatus.BAD_REQUEST).json({
           message: 'INVALID_CREDENTIALS',
-          code: 'INVALID_CREDENTIALS' 
+          code: 'INVALID_CREDENTIALS'
         });
       }
 
@@ -188,7 +188,12 @@ export default {
       res.status(HttpStatus.OK).json({
         message: 'SIGNIN_SUCCESSFUL',
         token,
-        user,
+        user: {
+          id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          photoURL: user.photoURL,
+        },
       });
     } catch (error) {
       console.error('Signin error:', error);
