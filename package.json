@@ -33,6 +33,7 @@
     "i18next": "^26.0.4",
     "i18next-fs-backend": "^2.6.3",
     "i18next-http-middleware": "^3.9.2",
+    "isomorphic-dompurify": "^3.8.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import HttpStatus from 'http-status';
+import DOMPurify from 'isomorphic-dompurify';
 
 import MessageModel from '@models/message-model';
 
@@ -45,7 +46,7 @@ export default {
 
       const message = await MessageModel.create({
         sender: senderId,
-        content: encrypt(content),
+        content: encrypt(DOMPurify.sanitize(content)),
         emailLists,
         code: encrypt(code),
         codeHash: generateHash(code),
@@ -200,7 +201,7 @@ export default {
       }
 
       if (content !== undefined) {
-        message.content = encrypt(content);
+        message.content = encrypt(DOMPurify.sanitize(content));
       }
 
       if (emailLists !== undefined) {
